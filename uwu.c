@@ -73,11 +73,11 @@ void createSons(int numHijos, int *arrayPID){
 				//char *argv[] = { "gcc", "-c", "-o", "hijo.o", "hijo.c", 0 };
 				execl("./hijo","","", (char *)0);
 				
-				}
+			}
 			else{
 				printf("UWU\n");
-				}
 			}
+		}
 		else{
 			arrayPID[i]=pid;
 			}
