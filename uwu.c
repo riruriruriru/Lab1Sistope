@@ -4,6 +4,9 @@
 #include <signal.h>
 #include <stdlib.h>
 
+static volatile int keepRunning = 1;
+static volatile int counter = 0;
+
 typedef struct Signal{
 	int numHijo;
 	int sName;
@@ -83,18 +86,52 @@ void createSons(int numHijos, int *arrayPID){
 			}
 		}
 	}
+
 int sendSignal(Signal *s, int *arrayPID, int numHijos){
+	int bool=0;
 	if(s->numHijo-1>numHijos){
 		printf("Hijo invalido\n");
 		return 0;
 		}
+	if(arrayPID[s->numHijo-1]==-1){
+		printf("Hijo ya esta muerto\n");
+		return 0;
+		}
 	printf("hijo destino pid: %d\n", arrayPID[s->numHijo-1]);
 	if(s->sName==15||s->sName==16||s->sName==17){
+		if(s->sName==16){
+			kill(arrayPID[s->numHijo-1],10);
+			}
+		else if(s->sName==15){
+			bool=kill(arrayPID[s->numHijo-1],s->sName);
+			printf("bool: %d\n", bool);
+			arrayPID[s->numHijo-1]=-1;
+			
+			}
+		else{
+			kill(arrayPID[s->numHijo-1],12);
+			}
 		
-		kill(arrayPID[s->numHijo-1],s->sName);
 		return 1;
 		}
 	return 0;
+	}
+void handler(int signum){
+	printf("RECIBI UN %d\n",signum);
+	if(signum==2){
+		counter++;
+		}
+	
+	if(counter==1){
+		printf("mandar sigint\n");
+		kill(0,2);
+		}
+	if(counter>2){
+		keepRunning=0;
+		exit(0);
+		printf("XAO\n");
+		}
+	printf("keeprunning: %d\n",keepRunning);
 	}
 
 int main(int argc, char *argv[]){
@@ -103,21 +140,24 @@ int main(int argc, char *argv[]){
 	scanf("%d", &numHijos);
 	printf("Se crearan %d hijos\n", numHijos);
 	pid_t *arrayPID;
-	char *string, *signal, *string2;
+	char *string,*signal2,*string2;
 	Signal *sig;
 	sig = (Signal *)malloc(sizeof(Signal));
 	sig->numHijo = 500;
 	//sig->sName = (char *)malloc(20*sizeof(char));
 	int nHijo=0;
 	char aux;
-	signal = (char *)malloc(25*sizeof(char));
+	signal2 = (char *)malloc(25*sizeof(char));
 	string = (char *)malloc(25*sizeof(char));
 	string2 = (char *)malloc(25*sizeof(char));
 	arrayPID = (pid_t *) malloc(numHijos*sizeof(pid_t));
 	createSons(numHijos, arrayPID);
 	int comprobacion = 0;
 	printf("Esperando...");
-	while(1){
+	if(signal(SIGINT, handler)!=SIG_ERR){
+			printf("RECIBI UN CTRL + C\n");
+			}
+	while(keepRunning){
 		do{
 			printf("Ingresar numero de hijo y señal a enviar (X-Y)\n");
 			scanf("%s",string);
@@ -126,6 +166,7 @@ int main(int argc, char *argv[]){
 				printf("Senial ingresada de manera incorrecta, intente otra vez\n");
 				}
 		}while(comprobacion==0);
+		
 		printf("Se enviara señal %d al hijo %d\n",sig->sName,sig->numHijo);
 		sendSignal(sig, arrayPID, numHijos);
 		//comprobarSenial(signal,sig);
