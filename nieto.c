@@ -7,14 +7,14 @@ static volatile int counter = 0;
 
 void controlador(int signum){
 	if (signum == 10){
-		printf("Soy el hijo %d y recibí SIGUSR1\n", getpid());
+		printf("Soy el hijo %d y recibí SIGUSR1\n",getpid());
 		int pidF = getpid();
 		int pid = 0;
 		char id[12];
 		sprintf(id, "%d", pidF);
 		if ((pid=fork())==0){
 			if(getpid()!=0){
-				char *argv[] = {"./contador", id,(const char*)NULL};
+				char *argv[] = {"./contador", id,(char*)NULL};
 				execv("contador", argv);
 			}
 			else{
@@ -25,15 +25,6 @@ void controlador(int signum){
 	}
 	else if(signum==12){
 		printf("Soy el hijo %d y recibí SIGUSR2\n", getpid());
-		int pid = 0;
-		if((pid=fork())==0){
-			if(getpid()!=0){
-				char *argv[] = {"./nieto", (const char*)NULL};
-				execv("nieto", argv);
-				}
-			
-			}
-		
 		}
 	else if(signum==15){
 		printf("Soy el hijo %d y recibí SIGTERM\n", getpid());
@@ -42,7 +33,7 @@ void controlador(int signum){
 		}
 	else if(signum==2){
 		if(counter==0){
-			printf("Soy el hijo con pid %d y estoy vivo aun. No me mates papa :c 🤡\n", getpid());
+			printf("Soy el nieto con pid %d y estoy vivo aun. No me mates abuelo :c 🤡\n", getpid());
 			counter++;
 			}
 		}
@@ -50,12 +41,12 @@ void controlador(int signum){
 }
 
 int main(){
-	//printf("soy hijo %d de %d\n", getpid(),getppid());
+	printf("soy nieto %d de %d\n", getpid(),getppid());
 	printf("xao\n");
 	while(1){
-		signal(SIGTERM,controlador);
-		signal(SIGUSR1,controlador);
-		signal(SIGUSR2,controlador);
+		//signal(SIGTERM,controlador);
+		//signal(SIGUSR1,controlador);
+		//signal(SIGUSR2,controlador);
 		signal(SIGINT,controlador);	
 		/*if(signal(15,controlador)==SIG_ERR){
 			printf("OWO\n");
