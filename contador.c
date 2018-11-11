@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
 		system("mkdir temp");
 	}
 	
-	printf("Directorio %s\n",directorio);
+	//printf("Directorio %s\n",directorio);
 	FILE *cont;
 	cont = fopen(directorio,"r");
 	if (cont == NULL){

@@ -34,7 +34,7 @@ void controlador(int signum){
 	else if(signum==2){
 		//Primer advertencia
 		if(counter==0){
-			printf("Soy el nieto con pid %d y estoy vivo aun. No me mates abuelo :c 🤡\n", getpid());
+			printf("Soy el nieto con pid: %d y estoy vivo aún. No me mates abuelo\n", getpid());
 			counter++;
 			}
 		//La segunda vez que se preciona Ctrl + c se termina el proceso
@@ -46,8 +46,8 @@ void controlador(int signum){
 }
 
 int main(){
-	printf("soy nieto %d de %d\n", getpid(),getppid());
-	printf("xao\n");
+	//printf("soy nieto %d de %d\n", getpid(),getppid());
+	//printf("xao\n");
 	while(1){
 		//signal(SIGTERM,controlador);
 		//signal(SIGUSR1,controlador);
