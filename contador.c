@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <dirent.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -7,13 +8,22 @@
 
 int main(int argc, char *argv[]){
 	int auxCont;
+	char directorio[50];
 	char archivo[20];
+	strcpy(directorio,"temp/");
 	strcpy(archivo,argv[1]);
 	strcat(archivo,".txt");
+	strcat(directorio,archivo);
+	
+	if (opendir("temp")==NULL){
+		system("mkdir temp");
+	}
+	
+	printf("Directorio %s\n",directorio);
 	FILE *cont;
-	cont = fopen(archivo,"r");
+	cont = fopen(directorio,"r");
 	if (cont == NULL){
-		cont = fopen(archivo,"w");
+		cont = fopen(directorio,"w");
 		fprintf(cont,"%d",1);
 		printf("pid: %s, y he recibido esta llamada 1 vez.\n",argv[1]);
 		fclose(cont);
@@ -24,7 +34,7 @@ int main(int argc, char *argv[]){
 		printf("pid: %s, y he recibido esta llamada %d veces.\n",argv[1],auxCont);
 		fclose(cont);
 		FILE *cont;
-		cont = fopen(archivo,"w");
+		cont = fopen(directorio,"w");
 		fprintf(cont,"%d",auxCont);
 		fclose(cont);
 		

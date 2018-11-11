@@ -130,14 +130,17 @@ int sendSignal(Signal *s, int *arrayPID, int numHijos){
 void handler(int signum){
 	printf("RECIBI UN %d\n",signum);
 	if(signum==2){
-		counter++;
+		counter++; //Numero de veces que se precionó Ctrl + c
 		}
 	
-	if(counter==1){
+	/*if(counter==1){
 		printf("mandar sigint\n");
-		kill(0,2);
-		}
-	if(counter>2){
+		//kill(0,2);
+		}*/
+	
+	//cuando se apretó por segunda vez Ctrl + c
+	if(counter==2){
+		system("rm -r ./temp"); //función para eliminar la carpeta con los archivos del contador
 		keepRunning=0;
 		exit(0);
 		printf("XAO\n");
@@ -206,6 +209,7 @@ int main(int argc, char *argv[]){
 	string2 = (char *)malloc(25*sizeof(char));
 	arrayPID = (pid_t *) malloc(numHijos*sizeof(pid_t));
 	createSons(numHijos, arrayPID, flag);
+	signal(SIGINT,handler);	//Se agrega nuevamente para poder eliminar los archivos de contador
 	int comprobacion = 0;
 	while(keepRunning){
 		do{

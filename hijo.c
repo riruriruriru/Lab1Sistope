@@ -41,10 +41,16 @@ void controlador(int signum){
 		exit(0);
 		}
 	else if(signum==2){
+		//Primer advertencia
 		if(counter==0){
 			printf("Soy el hijo con pid %d y estoy vivo aun. No me mates papa :c 🤡\n", getpid());
 			counter++;
 			}
+		//La segunda vez que se preciona Ctrl + c se termina el proceso	
+		else if(counter==1){
+			exit(0);
+			}
+		
 		}
 	
 }
