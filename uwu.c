@@ -140,11 +140,18 @@ void handler(int signum){
 	
 	//cuando se apretó por segunda vez Ctrl + c
 	if(counter==2){
-		system("rm -r ./temp"); //función para eliminar la carpeta con los archivos del contador
-		keepRunning=0;
-		exit(0);
-		printf("XAO\n");
+		if (opendir("temp")==NULL){
+			keepRunning=0;
+			exit(0);
+			printf("XAO\n");
 		}
+		else{
+			system("rm -r ./temp"); //función para eliminar la carpeta con los archivos del contador
+			keepRunning=0;
+			exit(0);
+			printf("XAO\n");
+		}
+	}
 	printf("keeprunning: %d\n",keepRunning);
 	}
 
