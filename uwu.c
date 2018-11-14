@@ -120,13 +120,13 @@ int sendSignal(Signal *s, int *arrayPID, int numHijos){
 			kill(arrayPID[s->numHijo-1],SIGUSR1);//se manda la señal 10, que SIGURS1 al hijo correspondiente
 			}
 		else if(s->sName==15){//si la señal es 15
-			bool=kill(arrayPID[s->numHijo-1],s->sName);//se manda señal sigterm al hijo correspondiente y se guarda el valor que indica si el hijo murio correctamente o con algun error
+			bool=kill(arrayPID[s->numHijo-1],SIGTERM);//se manda señal sigterm al hijo correspondiente y se guarda el valor que indica si el hijo murio correctamente o con algun error
 			//printf("bool: %d\n", bool);
 			arrayPID[s->numHijo-1]=-1;//se setea el valor del hijo muerto como -1 en el arreglo de PID
 			
 			}
 		else{//si la señal es 17
-			kill(arrayPID[s->numHijo-1],12);//se manda la señal SIGURS2 al hijo correspondiente
+			kill(arrayPID[s->numHijo-1],SIGUSR2);//se manda la señal SIGURS2 al hijo correspondiente
 			}
 		
 		return 1;
@@ -137,14 +137,11 @@ int sendSignal(Signal *s, int *arrayPID, int numHijos){
 //Entradas: entero correspondiente a la señal recibida
 void handler(int signum){
 	//printf("RECIBI UN %d\n",signum);
-	if(signum==2){ //si se recibe un signum, se aumenta el contador global
+	if(signum==SIGINT){ //si se recibe un signum, se aumenta el contador global
 		counter++; //Numero de veces que se presionó Ctrl + c
 		}
 	
-	/*if(counter==1){
-		printf("mandar sigint\n");
-		//kill(0,2);
-		}*/
+	
 	
 	//se reconoce cuando se apreta por segunda vez Ctrl + c
 	if(counter==2){
