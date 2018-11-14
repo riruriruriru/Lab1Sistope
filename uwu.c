@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <signal.h>
@@ -105,7 +106,6 @@ void createSons(int numHijos, int *arrayPID, int flag){
 //Entradas: estructura de tipo Signal que contiene la señal parseada indicando el hijo destino y la señal enviada, el arreglo del pid de los hijos y el numero de hijos creados inicialmente
 //Salida: int identificador que indica si la señal pudo ser enviada correctamente o no (1 caso exitoso, 0 cuando se produce un fallo)
 int sendSignal(Signal *s, int *arrayPID, int numHijos){
-	int bool=0;
 	if(s->numHijo-1>numHijos||s->numHijo<=0){//si se intenta mandar una señal a un hijo inexistente, se retorna un 0
 		printf("Hijo invalido\n");
 		return 0;
@@ -120,8 +120,7 @@ int sendSignal(Signal *s, int *arrayPID, int numHijos){
 			kill(arrayPID[s->numHijo-1],SIGUSR1);//se manda la señal 10, que SIGURS1 al hijo correspondiente
 			}
 		else if(s->sName==15){//si la señal es 15
-			bool=kill(arrayPID[s->numHijo-1],SIGTERM);//se manda señal sigterm al hijo correspondiente y se guarda el valor que indica si el hijo murio correctamente o con algun error
-			//printf("bool: %d\n", bool);
+			kill(arrayPID[s->numHijo-1],SIGTERM);//se manda señal sigterm al hijo correspondiente 
 			arrayPID[s->numHijo-1]=-1;//se setea el valor del hijo muerto como -1 en el arreglo de PID
 			
 			}
@@ -162,7 +161,6 @@ void handler(int signum){
 //Entradas: recibe el numero de argumentos ingresados, los argumentos y un puntero a las variables numHijos y flag para modificarlas en el scope global del proceso
 void getArguments(int argc, char *argv[], int *numHijos, int *flag){
 	int flags, opt;
-	int tfnd;
 	char *aux3;
 	aux3 = malloc(10*sizeof(char));
 	if(argc <3){//si se ingresa un numero de argumentos menor a 3, se finaliza la ejecucion del programa
@@ -170,7 +168,6 @@ void getArguments(int argc, char *argv[], int *numHijos, int *flag){
 		exit(EXIT_FAILURE);
 		}
 	int nChild = -1;
-	tfnd = 0;
 	flags = 0;
 	while ((opt = getopt(argc, argv, "mh:")) != -1) {
 	   switch (opt) {
@@ -184,7 +181,6 @@ void getArguments(int argc, char *argv[], int *numHijos, int *flag){
 				exit(EXIT_FAILURE);
 			   }
 		   //printf("optarg: %s\n", optarg);
-		   tfnd = 1;
 		   break;
 	   default: /* '?' */
 		   fprintf(stderr, "Uso correcto: %s [-h nchild] [-m]\n",
@@ -193,18 +189,12 @@ void getArguments(int argc, char *argv[], int *numHijos, int *flag){
 	   }
 	}
 
-	//printf("flags=%d; tfnd=%d; nsecs=%d; optind=%d\n",flags, tfnd, nChild, optind);
-	if(flags==1){
+	if(flags==1){//si se encontro un flag -m, se setea la variable global flag = 1, respecto al scope del proceso principal
 		(*flag) = 1;
 		}
-	(*numHijos) = nChild;
-	/* Other code omitted */
-	if(tfnd==0){
-		fprintf(stderr, "Usage: %s [-h nchild] [-m]\n", argv[0]);
-		exit(EXIT_FAILURE);
-		}
+	(*numHijos) = nChild; //se iguala la variable numHijos a nChild
 	if(nChild<0){
-		fprintf(stderr, "Usage: %s [-h nchild] [-m]\n", argv[0]);
+		fprintf(stderr, "Usage: %s [-h nchild] [-m]\n", argv[0]); //si la cantidad de hijos es negativa, se retorna un error
 		exit(EXIT_FAILURE);
 		}
 
@@ -215,30 +205,27 @@ int main(int argc, char *argv[]){
 
 	int numHijos = 0, flag = 0;
 	pid_t *arrayPID;
-	char *string,*signal2,*string2;
+	char *string;
 	Signal *sig;
 	getArguments(argc, argv, &numHijos, &flag);
-	//printf("NUMERO HIJOS GETOPT: %d - ESTADO FLAG N: %d\n",numHijos,flag);
-	sig = (Signal *)malloc(sizeof(Signal));
-	signal2 = (char *)malloc(25*sizeof(char));
+	sig = (Signal *)malloc(sizeof(Signal));//se le da memoria a la estructura Signal
 	string = (char *)malloc(25*sizeof(char));
-	string2 = (char *)malloc(25*sizeof(char));
 	arrayPID = (pid_t *) malloc(numHijos*sizeof(pid_t));
-	createSons(numHijos, arrayPID, flag);
+	createSons(numHijos, arrayPID, flag);//se ejecuta el procedimiento que crea hijos
 	signal(SIGINT,handler);	//Se agrega nuevamente para poder eliminar los archivos de contador
 	int comprobacion = 0;
-	while(keepRunning){
+	while(keepRunning){//ciclo while para que el padre envie señales indefinidamente hasta que se cierre el proceso con ctrl + c
 		do{
 			printf("Ingresar numero de hijo y señal a enviar (X-Y):\n");
 			scanf("%s",string);
-			comprobacion=comprobarSenial(string,sig,numHijos);
+			comprobacion=comprobarSenial(string,sig,numHijos);//se comprueba si la señal ingresada por el usuario tiene el formato correcto
 			if(comprobacion==0){
 				printf("Señal ingresada de manera incorrecta, intente otra vez\n");
 				}
-		}while(comprobacion==0);
+		}while(comprobacion==0);//si la comprobacion falla, se pide una nueva señal
 		
 		printf("La señal %d será enviada al hijo %d de pid %d, \n",sig->sName,sig->numHijo,arrayPID[sig->numHijo-1]);
-		sendSignal(sig, arrayPID, numHijos);
+		sendSignal(sig, arrayPID, numHijos);//se manda la señal ya comprobada
 		getchar();
 		
 		}
